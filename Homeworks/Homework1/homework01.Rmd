@@ -70,3 +70,7 @@ canada_fixed %>% ggplot(aes(x=year,y=lifeExp,colour=country))+
 ```
 
 
+ **Explanation**
+ 
+As we can see from the above plot, life expectancy in Mexico is lower than Canda and the United States. Canada has higher life expectancy among others.Moreover, life expectancy in the US stay almost constant after 1980 while the life expectancy of other contries grow.
+
