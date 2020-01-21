@@ -19,13 +19,13 @@ d
 ```{r}
 install.packages('devtools')
 library(devtools)
-find_rtools()
-
 devtools::install_github("haleyjeppson/classdata")
+#gives me credential errors, the problem was related to git path already set and need to unset, follow this
+#https://github.com/r-lib/devtools/issues/1566
 
-
-library("devtools")
-install_github("hadley/rvest")
+library(classdata)
+data(fbi)
+fbi
 
 
 ```
