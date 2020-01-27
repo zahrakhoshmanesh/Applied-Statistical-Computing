@@ -17,16 +17,36 @@ d
 ```
 
 ```{r}
-install.packages('devtools')
+#install.packages('devtools')
 library(devtools)
-devtools::install_github("haleyjeppson/classdata")
+#devtools::install_github("haleyjeppson/classdata")
 #gives me credential errors, the problem was related to git path already set and need to unset, follow this
 #https://github.com/r-lib/devtools/issues/1566
 
 library(classdata)
+
 data(fbi)
 fbi
 
+
+```
+```{r}
+fbi$State[1]
+```
+
+```{r}
+# Elements of the five point summary:
+# mean, median, min, max, quartiles
+# Other summary statistics:
+#  range, sd, var
+# ummaries of two variables:
+#  cor, cov
+
+
+fbi[1:10,]
+#use na.rm=TRUE for excluding the missing value
+mean(fbi$Count,na.rm = TRUE)
+sd(fbi$Count,na.rm=TRUE)
 
 ```
 
