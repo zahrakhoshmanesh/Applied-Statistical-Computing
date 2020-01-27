@@ -18,6 +18,7 @@ library(tidyverse)
 
 ```{r}
 recent_grads <- read.csv("https://raw.githubusercontent.com/Stat480-at-ISU/materials-2020/master/02-r_intro/data/recent_grads.csv")
+
 ```
 
 3. Create a new variable, `share_women`, that is women as share of total; i.e. the number of women divided by the total number of men and women.
@@ -81,7 +82,7 @@ correlation
 
 ```
 
-correlation is -0.6186898 and it is not much strong,the direction is negative between two variables.
+correlation is -0.6186898 which indicates variables which can be considered moderately correlated. 
 
 ```{r}
 #7- Use the original dataset and `ggplot2` to draw a scatterplot of women as share of total and the median earnings. Color points by the major category (`major_category`). Comment on the result.
@@ -91,6 +92,9 @@ ggplot(data= recent_grads,aes(x=share_women,y=Median))+
 ggplot(data = recent_grads, aes(x = log(share_women), y = log(Median))) +
   geom_point(aes(color=Major_category))
 
+
+  
+
 ```
 
 
@@ -99,4 +103,20 @@ Interpretation of result:
 1. Form: Linear
 2. Strength: not strong. Data points are scattered.
 3. Direction: Negatively Associated.
-4. a few outliers.
+4. an outlier. look at below code
+
+```{r}
+#check for outlier in indivisual variables
+boxplot(recent_grads$share_women)
+boxplot(recent_grads$Median)#median has some outliers
+
+# use cook distance to check the outlier
+mod <- lm(share_women ~ recent_grads$Median, data=recent_grads)
+cooksd <- cooks.distance(mod)
+
+plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # plot cook's distance
+abline(h = 4*mean(cooksd, na.rm=T), col="red")  # add cutoff line
+text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4*mean(cooksd, na.rm=T),names(cooksd),""), col="red")  # add labels
+
+```
+
