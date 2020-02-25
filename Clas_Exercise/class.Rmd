@@ -1,0 +1,56 @@
+---
+title: "inclass week 3"
+author: "Zahra Khoshmanesh"
+date: "1/28/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+```{r}
+library(ggplot2) 
+# not found? run install.packages("ggplot2")
+library(classdata) 
+# not found? run devtools::install_github("haleyjeppson/classdata")
+```
+
+```{r}
+fbiwide <- read.csv("https://raw.githubusercontent.com/Stat480-at-ISU/materials-2020/master/02-r_intro/data/fbiwide.csv")
+
+
+```
+
+```{r}
+ggplot(data=fbiwide, aes(x = Year, y = Murder)) + geom_point() + facet_wrap(~State)
+
+```
+
+```{r}
+ggplot(data=fbiwide, aes(x = Year, y = Larceny.theft)) + geom_point() + facet_wrap(~State)
+
+```
+
+```{r}
+ggplot(data=fbiwide, aes(x = Year, y =Larceny.theft)) + geom_point() + facet_wrap(~State)+
+    scale_y_log10()
+
+```
+
+```{r}
+ggplot(data=fbiwide, aes(x = Year, y = Larceny.theft)) + geom_point() + facet_wrap(~State,scales = "free_y")
+
+```
+
+```{r}
+ggplot(data=fbiwide,aes(x=State,fbiwide$Robbery))+
+  geom_boxplot()
+```
+
+```{r}
+ggplot(fbi, aes(x = Violent.crime)) + 
+  geom_bar(aes(weight= Count))+facet_wrap(~Type) 
+```
+
