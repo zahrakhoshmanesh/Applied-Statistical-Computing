@@ -1,7 +1,7 @@
 ---
 title: 'Stat 480 - Homework #2'
 author: "Zahra Khoshmansh"
-date: "1/27/2020"
+date: "1/29/2020"
 output: html_document
 ---
 
@@ -38,72 +38,94 @@ For the submission: submit your solution in an R Markdown file and (just for ins
 
 ## Solution
 
+1. Download the RMarkdown file with these homework instructions to use as a template for your work. Make sure to replace "Your Name" in the YAML with your name.
+
+2. Using the command below, read in the data set into your R session. 
+
 ```{r}
 #2-read dataset
 recent_grads <- read.csv("https://raw.githubusercontent.com/Stat480-at-ISU/materials-2020/master/02-r_intro/data/recent_grads.csv")
 
 ```
 
+3. Create a new variable, `share_women`, that is women as share of total; i.e. the number of women divided by the total number of men and women.
+
 ```{r}
-#3-Create a new variable, `share_women`, that is women as share of total; i.e. the number of women divided by the total number of men and women.
+
 recent_grads$share_women <- recent_grads$Women/(recent_grads$Women + recent_grads$Men)
 head(recent_grads)
 ```
 
+4. Create a subset of the data containing only the rows where the `major_category` is `STEM`.
 
 ```{r}
-#4-Create a subset of the data containing only the rows where the `major_category` is `STEM`
+
 STEM <- recent_grads %>% filter(Major_category %in% "STEM")
 head(STEM)
 
 ```
 
+5. For your subset, compute the average  of `share_women` and its standard deviation. Also compute the average median earnings (`median`) and its standard deviation. Comment on the results. (You might have to deal with missing values appropriately).
 
 ```{r}
-#5-For your subset, compute the average  of `share_women` and its standard deviation. Also compute the average median earnings (`median`) and its standard deviation. Comment on the results. (You might have to deal with missing values appropriately).
+
+#there is missing value in share_women , so we use na.rm=true in calculating mean and sd
+#sum(is.na(recent_grads$share_women))
 mean_share_woman <- mean(recent_grads$share_women,na.rm = TRUE)
 mean_share_woman
+
 sd_share_woman <- sd(recent_grads$share_women,na.rm = TRUE)
 sd_share_woman
 
-mean_median_earnings <- mean(recent_grads$Median,na.rm = TRUE)
+#there is not any missing value in median earning , sono need to use na.rm=true in calculating mean and sd
+#sum(is.na(recent_grads$Median))
+
+mean_median_earnings <- mean(recent_grads$Median)
 mean_median_earnings
-sd_median_earnings <- sd(recent_grads$Median,na.rm = TRUE)
+
+sd_median_earnings <- sd(recent_grads$Median)
 sd_median_earnings
 ```
 
+there is missing value in share_woman, so we used na.rm=True when calculate the mean and sd.
 
+the average of women proportion in STEM major is : 0.5222234 and standard deviation is 0.231205 indicating the variation is relatively high.
+the average median earning is 40151.45 and standard deviation of it is : 11470.18 indicating the variation is relatively high.
+
+6. Compute the correlation between women as a share of total (`share_women`) and the median earnings (`median`) and interpret your results. 
 
 ```{r}
-#6- Compute the correlation between women as a share of total (`share_women`) and the median earnings (`median`) and interpret your results.
+# there is missing value and need to use "use" option
+correlation <- cor(recent_grads$share_women,recent_grads$Median)
+correlation
 
-correlation <- cor.test(recent_grads$share_women,recent_grads$Median, method = "pearson")
+correlation <- cor(recent_grads$share_women,recent_grads$Median,use="complete.obs")
 correlation
 
 ```
 
-correlation is -0.6186898 which indicates variables which can be considered moderately correlated. 
+we used cor function to calculate the correlation. since one of variables has missing value we need to use "use" option with value complete.obs to calculate the correlation value for not missing value rows. correlation is -0.6186898 which indicates share_women negatively correlated to median earning. value is -0.62  which considered moderately negatively correlated. when we have stem major having mostly woman the median earning is decreasinglrelatively. and when we have majors dominated by men the median earning are much higher.
+
+
+7- Use the original dataset and `ggplot2` to draw a scatterplot of women as share of total and the median earnings. Color points by the major category (`major_category`). Comment on the result.
 
 ```{r}
-#7- Use the original dataset and `ggplot2` to draw a scatterplot of women as share of total and the median earnings. Color points by the major category (`major_category`). Comment on the result.
+
 ggplot(data= recent_grads,aes(x=share_women,y=Median))+
   geom_point(aes(color=Major_category))
 
-ggplot(data = recent_grads, aes(x = log(share_women), y = log(Median))) +
-  geom_point(aes(color=Major_category))
-
-
-  
 
 ```
 
 
 Interpretation of result:
 
+As we can see when the share_women are close to one, the median earning decreasing, means the major dominated by men receive higher median earning in general. we can see that the data has some outliers like the one in upper right of the scatter plot. the trend is linear and direction is negative but not strong. woman mostly dominated education major while stem major scattered.
+
 1. Form: Linear
 2. Strength: not strong. Data points are scattered.
 3. Direction: Negatively Associated.
-4. an outlier. look at below code
+4. some outlier. look at below code
 
 ```{r}
 #check for outlier in indivisual variables

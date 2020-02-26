@@ -1,23 +1,17 @@
 ---
 title: 'Stat 480 - Homework #6'
-author: "Your Name"
+author: "Zahra Khoshmanesh"
 date: "2/27/2020"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+library(tidyverse)
+library(forcats)
 ```
 
-<br/>
 
-#### Submission Details
-
-**Due date**: the homework is due before class on Thursday. 
-
-**Submission process**: submit both the R Markdown file and the corresponding html file on canvas. Please submit both the `.Rmd` and the `.html` files separately and do not zip the two files together.
-
-<br/>
 
 #### Ames housing
 
@@ -28,7 +22,38 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE)
 2. The Ames based, non-profit company OAITI provides aoe open-source data sets. One of these data sets consists of information on all house sales in Ames between 2008 and 2010. The following piece of code allows you to read the dataset into your R session. How many house sales were there between 2008 and 2010? Which type of variables are we dealing with?
 
 ```{r}
+library(dplyr)
 housing <- read.csv("https://raw.githubusercontent.com/OAITI/open-datasets/master/Housing%20Data/Ames-Housing.csv")
+# How many house sales were there between 2008 and 2010?
+housing %>% filter(YearSold >=2008 & YearSold <=2010) %>% count()
+#Which type of variables are we dealing with?
+housing %>% glimpse()
+
+```
+
+There is 1615 housees that sold between 2008 and 20010. The type of variables are integer and factors:
+integers :
+$ SalePrice    <int> 
+$ Bedrooms     <int> 
+$ Baths        <int> 
+$ LotArea      <int> 
+$ LivingArea   <int> 
+$ GarageArea   <int>
+$ YearBuilt    <int> 
+$ YearSold     <int> 
+
+Factors:
+
+$ Neighborhood <fct> 
+$ HouseStyle   <fct> 
+
+
+```{r}
+levels(housing$Neighborhood)
+```
+
+```{r}
+levels(housing$HouseStyle)
 ```
 
 
@@ -36,17 +61,37 @@ housing <- read.csv("https://raw.githubusercontent.com/OAITI/open-datasets/maste
 3. Do sales prices change over time? (Don't test significances) Provide a graphic that supports your statement.
 
 ```{r}
+ggplot(housing,aes(x=as.factor(YearSold),y=SalePrice,fill=as.factor(YearSold)))+
+  geom_boxplot()
 
 ```
 
+Based on the box plot of price in different years, the median of sale price is almost same in 2008,2009 and 2010. However, we have higher minimum sale price in 2010 and higher 75 percentile in 2009. There are many extream values in all years and the highest sale price was in 2008.
+
+
+```{r}
+ggplot(housing,aes(x=as.factor(YearSold),y=SalePrice,fill=factor(YearSold)))+
+  geom_point()
+```
 
   
 4. What is the relationship between sales prices and the size of the house (living area)? Make a chart and describe the relationship.
 
 ```{r}
 
+ggplot(housing,aes(x=LivingArea,y=SalePrice))+
+  geom_point()
+
 ```
 
+There is a positive linear relation between size of the house and sale price. when the size of house increasing, the price also increasing.
+
+the below chart show better linear relation between the size and price when we use log of price .
+
+```{r}
+ggplot(housing,aes(x=LivingArea,y=log(SalePrice)))+
+  geom_point()
+```
 
   
 5. Use `dplyr` functions to:  
@@ -56,18 +101,59 @@ housing <- read.csv("https://raw.githubusercontent.com/OAITI/open-datasets/maste
   - exclude averages that are based on fewer than 10 records,  
   - reorder the remaining neighborhoods according to the mean sales prices.  
   
+the calculation based on the price of lot area per square foot
 
 ```{r}
+housing %>% 
+  mutate(ppf=SalePrice/LotArea) %>% #introduce new variable price per square foot
+  group_by(Neighborhood) %>% #group by neighborhood
+  summarise(average_per_square=mean(ppf), 
+            records=n(),
+            mean_sale_price=mean(SalePrice)) %>% 
+  filter(records>=10) %>%  #filter the summary that has equal or more than 10 records
+  arrange(desc(mean_sale_price)) #arrange the list based on mean sale price
+  
+  
+
 
 ```
+As we can see Nridght has the highest sale price per square foot.
 
 
+the calculation based on the price of living area per square foot
+
+```{r}
+housing %>% 
+  mutate(ppf=SalePrice/LivingArea) %>% 
+  group_by(Neighborhood) %>% 
+  summarise(average_per_square=mean(ppf),
+            records=n(),
+            mean_sale_price=mean(SalePrice)) %>% 
+  filter(records>=10) %>% 
+  arrange(desc(mean_sale_price))
+  
+  
+
+
+```
 
 6. Draw a chart of the average sale prices by neighborhood and comment on it. Only consider neighborhoods with at least 10 sales. <br><br> **Bonus**: write the code for this question and the previous one in a single statement for +0.5 point extra credit.
 
 ```{r}
 
+housing %>% 
+  group_by(Neighborhood) %>% #group by neighborhood
+  summarise(average_sale_price=mean(SalePrice),sale_records=n()) %>% #calculate the mean of sale price for each neighborhood
+  filter(sale_records>=10) %>% #filter the mean sale price rows that has less than 10 sales
+  ggplot(aes(x=average_sale_price, #draw the scatter plott of neighborhood vs. mean sale price , reorder the result
+            y = fct_reorder(Neighborhood, average_sale_price),color=Neighborhood)) + geom_point()
+
+
+  
+
 ```
+
+As we can see the NridgHt,NoRidge,StoneBr neighborhood have the highest sale price
 
 
 7. Use `dplyr` functions to:
@@ -78,6 +164,13 @@ housing <- read.csv("https://raw.githubusercontent.com/OAITI/open-datasets/maste
   - create a new variable `YBCut` from `YearBuilt` that introduces age categories that groups the year a house was built into intervals: 1800-1850, 1850-1900, 1950-2000, 2000+ (see `?cut`).
   
 ```{r}
+housing %>% 
+  mutate(garage=(GarageArea!=0)) %>%   #a logical variable called 'garage' that is FALSE if the garage area is zero, and TRUE otherwise
+  filter(garage!=FALSE,HouseStyle=="1-Story" | HouseStyle=="2-Story") %>% #exclude all sales of houses that do not have a garage and only consider 1 and 2 story houses (`HouseStyle`)
+  mutate(YBcut=cut(YearBuilt,c(1800,1850,1900,1950,2000,2010), #create a new variable `YBCut` from `YearBuilt`
+                   labels=c("1800-1850","1850-1900","1900-1950","1950-2000","2000+"))) %>%  head()
+
+
 
 ```
   
@@ -87,7 +180,21 @@ housing <- read.csv("https://raw.githubusercontent.com/OAITI/open-datasets/maste
 
 ```{r}
 
+housing %>% 
+  mutate(garage=(GarageArea!=0)) %>%  
+  filter(garage!=FALSE,HouseStyle=="1-Story" | HouseStyle=="2-Story") %>% 
+  mutate(YBcut=cut(YearBuilt,c(1800,1850,1900,1950,2000,2010), 
+                   labels=c("1800-1850","1850-1900","1900-1950","1950-2000","2000+"))) %>%  ggplot(aes(x=YBcut,y=GarageArea,fill=YBcut))+facet_wrap(~HouseStyle)+geom_boxplot()
+
 ```
+
+1850-1900 : As we can see, in 1850 to 1900 the 2-story house has higher garage area compared to 1-story house. 1-story house seems has the fixed garage size in 1850 to 1900.
+1900-1950 : between 1900 to 1950 1-story houses has lower median garage area size compared to 1850-1900. the same trend in 2 story house in this year range: the median of garage area size decreased compare to 1850-1900
+1950-2000: the median garage size in both 1 story and 2 story increased compared to 1900-1950. we have many extream value of garage size in 2 story house.
+2-story type houses has higher median garage area compared to 1-story house
+2000+ : the median of garage area size in 2-story is lower than the median size of garage area of 1-story after 2000 year. seems the trend in recent year is that 1-story has higher size of garage area
+
+in both 1-story and 2-story the median size of garage area is increasing except in 1900-1950 in 2-story that decreased compared to 1850-1900.
 
 
 
