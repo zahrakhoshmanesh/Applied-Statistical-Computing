@@ -1,0 +1,214 @@
+---
+title: 'Stat 480 - Homework #8'
+author: "Zahra Khoshmanesh"
+date: "3/12/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+<br/>
+
+## The Joy of Painting with Bob Ross
+
+![](https://static01.nyt.com/images/2019/07/13/arts/13video/bob-ross-cover-videoSixteenByNineJumbo1600-v5.png)
+
+
+
+
+### Questions
+
+1. Download the RMarkdown file with these homework instructions to use as a template for your work. Make sure to replace "Your Name" in the YAML with your name.
+
+```{r}
+# load necessary libraries
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(forcats)
+library(readr)
+```
+
+
+2. The data this week comes from [fivethiryeight](https://github.com/fivethirtyeight/data). The data set includes information on the 403 episodes of "The Joy of Painting". The accompanying article is published [here](https://fivethirtyeight.com/features/a-statistical-analysis-of-the-work-of-bob-ross/).  
+
+```{r }
+# read in the data
+bob_ross <- read_csv('https://raw.githubusercontent.com/Stat480-at-ISU/Stat480-at-ISU.github.io/master/homework/data/bob-ross.csv')
+```
+
+3. Variables `alizarin_crimson` through `burnt_umber` correspond to the binary presence (0 or 1) of that color in the painting. Gather all of these variables and create a long form of the data, introducing two new variables called `color` and `presence`. Save the result in a data frame called `bob_ross_colors`.
+
+```{r}
+## your answer here
+bob_ross %>% glimpse()
+bob_ross_colors <- bob_ross %>% 
+  pivot_longer(cols = alizarin_crimson:burnt_umber, 
+               names_to = "color", 
+               values_to = "presence")
+bob_ross_colors %>% glimpse()
+```
+
+
+4. Does Bob Ross have a favorite color to paint with? Use the data `bob_ross_colors` as your starting point and for each color calculate the number of times that color was used throughout the series. After using this number to reorder the levels of the variable `color`, create a bar chart using the code below as your starting point and add in the necessary aesthetic mappings within `ggplot(aes( ))`. Describe and summarize the chart.
+
+```
+question4_data %>%
+  ggplot(aes( )) + 
+  geom_bar(show.legend = FALSE) + 
+  coord_flip() + 
+  theme_minimal() +
+  labs(y = "Number of paintings",
+       x = "", 
+       title = "Frequency of colors in Bob Ross Paintings") +
+  scale_fill_manual(values = c("#CD5C5C", "#8A3324", "#2C6436", "#3C67A7", "#643914", "#E7BD2F", "#546F1F", "#C36A4A", "#346BB1", "#B58A30", "#F8ED5F", "#372518", "#973B29")) 
+```
+
+
+```{r}
+## your answer here
+question4_data <- bob_ross_colors %>% 
+  group_by(color) %>% 
+  summarise(num_time_used=sum(presence)) %>%
+  mutate(color=reorder(color,num_time_used)) %>% 
+  arrange(desc(num_time_used))
+
+question4_data
+
+question4_data %>% 
+  ggplot(aes(x=color,weight=num_time_used,fill=color )) + 
+  geom_bar(show.legend = FALSE) + 
+  coord_flip() + 
+  theme_minimal() +
+  labs(y = "Number of times color used",
+       x = "color", 
+       title = "Frequency of colors in Bob Ross Paintings") +
+  scale_fill_manual(values = c("#CD5C5C", "#8A3324",
+                               "#2C6436", "#3C67A7", 
+                               "#643914", "#E7BD2F",
+                               "#546F1F", "#C36A4A",
+                               "#346BB1", "#B58A30",
+                               "#F8ED5F", "#372518", 
+                               "#973B29")) 
+
+  
+
+
+
+  
+ 
+```
+
+**Describe and summarize the chart**
+
+Bob Ross used alizarin_crimson color 380 times following van_dyke_brown 371 times and cadmium_yellow 346. He used indian_red just once and burnt_umber 55 times.
+
+
+5. For this question use the original data again. Variables `aurora_borealis` through `winter` correspond to the binary presence (0 or 1) of that element in the painting. Use `pivot_longer()` as shown in class to transform the data into a tidier format with new variables `element` and `presence`. Save the result in a data frame called `bob_ross_elements`.
+
+```{r}
+## your answer here
+bob_ross_elements <- bob_ross %>% 
+  pivot_longer(cols = aurora_borealis:winter, 
+               names_to = "element", 
+               values_to = "presence")
+
+bob_ross_elements %>% glimpse()
+```
+
+
+6. What are the most frequent elements in his paintings? Use the data `bob_ross_elements` as your starting point and for each element calculate the number of times that element was included. Then use this number to reorder the levels of `element`. Exclude elements that were featured in fewer than 50 paintings and create a bar chart. Use the code below as your starting point and add in the necessary aesthetic mappings within `ggplot(aes( ))`. Describe and summarize the chart.
+
+```
+question6_data %>%
+  ggplot(aes( )) + 
+  geom_bar(fill = "seagreen") + 
+  coord_flip() + 
+  theme_minimal() +
+  labs(y = "Number of paintings",
+       x = "", 
+       title = "What were most common features in Bob Ross paintings?",
+       subtitle = "Paintings by the numbers")
+```
+
+```{r}
+## your answer here
+question6_data <- bob_ross_elements %>% 
+  group_by(element) %>%
+  summarise(num_used_element=sum(presence)) %>%
+  mutate(element=reorder(element, num_used_element)) %>% 
+  filter(num_used_element >= 50) %>% 
+  arrange(desc(num_used_element)) 
+
+question6_data
+
+question6_data %>%
+  ggplot(aes(x=element,weight=num_used_element )) + 
+  geom_bar(fill = "seagreen") + 
+  coord_flip() + 
+  theme_minimal() +
+  labs(y = "Number of paintings",
+       x = "", 
+       title = "What were most common features in Bob Ross paintings?",
+       subtitle = "Paintings by the numbers")
+
+
+```
+
+**Describe and summarize the chart.**
+The chart shows the most frequent elements that Bob used in his painting. He loves tree since used it a lot in his painting.<br>
+
+Bob Ross used  mostly tree and trees 361 and 367 times as elements in his painting following deciduous and conifier. Cabin and Winter are used less compared to tree and trees and used 69 times in his painting. 
+
+
+7. Did the content of the paintings change over time? We will attempt to answer this question by looking at elements that appeared in more than 90 paintings and their trends over the seasons.  Use the data `bob_ross_elements` as your starting point and for each season and element, calculate the number of times an element was included. Exclude elements that were included in less than 90 paintings total. Create a line plot showing number of times an element was included for each season with season on the x-axis and facet by element. Use the code below as your starting point and add in the necessary aesthetic mappings within `ggplot(aes( ))` and add in the faceting. Describe and summarize the chart.
+
+```
+question7_data %>%
+  ggplot(aes( )) + 
+  geom_line(color = "deepskyblue") + 
+  # add faceting here
+  labs(y = "Number of paintings with element",
+       title = "The content of Bob Ross paintings over time",
+       subtitle = "Dashed line is number of episodes in the season") + 
+  geom_hline(yintercept = 13, lty = 2, color = "grey70") + 
+  theme_minimal() + 
+  expand_limits(y = 0) 
+  ```
+
+
+```{r}
+## your answer here
+question7_data <- bob_ross_elements %>% 
+  group_by(element) %>% 
+  mutate(num_times=sum(presence)) %>% 
+  filter(num_times > 90) %>% 
+  group_by(season,element) %>% 
+  summarise(appeared=sum(presence)) 
+
+question7_data %>%
+  ggplot(aes(x=season,y=appeared )) + 
+  geom_line(color = "deepskyblue") + 
+  facet_wrap(~element)+
+  labs(y = "Number of paintings with element",
+       title = "The content of Bob Ross paintings over time",
+       subtitle = "Dashed line is number of episodes in the season") + 
+  geom_hline(yintercept = 13, lty = 2, color = "grey70") + 
+  theme_minimal() + 
+  expand_limits(y = 0) 
+
+
+```
+
+**Describe and summarize the chart.**
+*Tree and trees* appeared in all season in highest frequensy compared to other elements.mountain used less than other elements
+bushes used less between season 14-20 and use less compared to other elements
+clouds are used less in season 20 to 30 and max using is in seasons 7-12 ish
+conifier has min using in season 18ish and used again in following season like 20 and so on
+decidous used medium in all seasons, min using was in season 20
+mountain also used less in all seasons.
+river used more in season 12 and 22 and used less in season 4 and 15 and 28 ish.
+As we can see for each elements that tell us in which seasons the appearance were high and low. seems we have many local min and max for each elements and they are repeated.
+

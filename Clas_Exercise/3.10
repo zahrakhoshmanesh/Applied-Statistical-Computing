@@ -1,0 +1,30 @@
+url <- "https://github.com/Stat579-at-ISU/materials/blob/master/03_tidyverse/data/Iowa_Liquor_Sales.csv.zip?raw=TRUE"
+download.file(url, "iowa.zip", mode="wb")
+iowa <- readr::read_csv("iowa.zip")
+
+library(tidyverse)
+glimpse(iowa)
+head(parse_number(iowa$`Store Location`))
+head(iowa$`Store Location`)
+
+#seperate month,day,year
+iowa1<-iowa %>% separate(Date,c("Month","Day","Year")) %>% 
+  separate(`Store Location`,into=c("var1","var2","var3"),sep=" ") %>% 
+  select(-var1) %>% 
+  mutate(long=parse_number(var2),lat=parse_number(var3)) %>% 
+           select(-var2,-var3) %>% 
+           glimpse()
+
+iowa1 %>% ggplot(aes(x=Year,weight=`Sale (Dollars)`))+geom_bar()
+
+sum(iowa$`Sale (Dollars)`,na.rm = TRUE)
+which.max(iowa$`Sale (Dollars)`)
+which.max(iowa$`Volume Sold (Liters)`)
+
+#max
+iowa1 %>% arrange(desc(`Sale (Dollars)`)) %>% slice(1)
+
+
+#plot
+iowa1 %>% ggplot(aes(x=long,y=lat))+geom_point()
+
